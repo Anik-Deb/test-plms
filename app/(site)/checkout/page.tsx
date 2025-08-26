@@ -241,13 +241,22 @@ interface CheckOutPageProps {
   };
 }
 
-const getCartFromCookies = (): ShoppingCartCheckout => {
+const getCartFromCookies = async (): Promise<ShoppingCartCheckout> => {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const cartCookie = cookieStore.get("shopping_cart");
 
     if (cartCookie?.value) {
-      return JSON.parse(cartCookie.value);
+      const parsedCart = JSON.parse(cartCookie.value);
+      // Ensure the cart has the required structure
+      return {
+        items: parsedCart.items || [],
+        total: parsedCart.total || 0,
+        type: parsedCart.type || "NONE",
+        itemCount: parsedCart.itemCount || 0,
+        currency: parsedCart.currency || "BDT",
+        lastUpdated: parsedCart.lastUpdated || new Date().toISOString(),
+      };
     }
 
     return {
@@ -272,10 +281,13 @@ const getCartFromCookies = (): ShoppingCartCheckout => {
 };
 
 const CheckOutPage = async ({ searchParams }: CheckOutPageProps) => {
-  // Get cart data from cookies
-  const cartData = getCartFromCookies();
+  // Get cart data from cookies (await the promise)
+  const cartData = await getCartFromCookies();
 
-  if (cartData.items.length === 0) {
+  // Debug: Log cart data (remove in production)
+  console.log("Cart data:", cartData);
+
+  if (!cartData || cartData.items.length === 0) {
     return (
       <div className="app-container py-20 text-center min-h-[60vh] flex items-center justify-center">
         <div className="max-w-3xl border border-dashed border-gray-300 mx-auto p-4 md:p-16 rounded-lg">
@@ -306,9 +318,9 @@ const CheckOutPage = async ({ searchParams }: CheckOutPageProps) => {
   const errorMessage = searchParams.error;
   const transactionId = searchParams.trxID;
   const amount = searchParams.amount;
-  const isPaymentSuccessful = transactionId && amount;
+  const isPaymentSuccessful = !!(transactionId && amount);
 
-  if (cartData?.type === "SUBSCRIPTION") {
+  if (cartData.type === "SUBSCRIPTION") {
     return (
       <SubscriptionCheckout
         cartData={cartData}
@@ -320,7 +332,7 @@ const CheckOutPage = async ({ searchParams }: CheckOutPageProps) => {
     );
   }
 
-  if (cartData?.type === "COURSE") {
+  if (cartData.type === "COURSE") {
     return (
       <CourseCheckout
         cartData={cartData}
@@ -332,7 +344,19 @@ const CheckOutPage = async ({ searchParams }: CheckOutPageProps) => {
     );
   }
 
-  return null;
+  // Fallback for unknown cart type
+  return (
+    <div className="app-container py-20 text-center">
+      <h2 className="text-2xl font-bold mb-4">অজানা কার্ট টাইপ</h2>
+      <p className="mb-4">কার্ট টাইপ: {cartData.type}</p>
+      <Link href="/prime">
+        <Button variant="primary">
+          <ArrowLeft className="mr-2 w-4 h-4" />
+          ফিরে যান
+        </Button>
+      </Link>
+    </div>
+  );
 };
 
 export default CheckOutPage;
