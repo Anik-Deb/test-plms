@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { redirect } from "next/navigation";
-import SubscriptionCheckoutForm from "./SubscriptionCheckoutForm";
+import SubscriptionCheckoutForm from "./subscription-checkout-form";
 import {
   checkUserTrialHistory,
   getSubscriptionPlanByIdDBCall,
