@@ -380,13 +380,6 @@ const CheckOutPage = async ({ searchParams }: CheckOutPageProps) => {
             {JSON.stringify(cartData, null, 2)}
           </pre>
         </div>
-        <CourseCheckout
-          cartData={cartData}
-          errorMessage={errorMessage}
-          isPaymentSuccessful={isPaymentSuccessful}
-          transactionId={transactionId}
-          amount={amount}
-        />
         <p className="mt-4 text-blue-600">
           CourseCheckout component temporarily disabled for debugging
         </p>
