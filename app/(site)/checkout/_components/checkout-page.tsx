@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { getServerCart } from "@/lib/actions/cart-cookie";
 
 import Link from "next/link";
