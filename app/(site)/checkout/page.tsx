@@ -350,14 +350,14 @@ const CheckOutPage = async ({ searchParams }: CheckOutPageProps) => {
             </pre>
           </div>
         </div>
-        {/* <SubscriptionCheckout
+        <SubscriptionCheckout
           cartData={cartData}
           plan={plan}
           errorMessage={errorMessage}
           isPaymentSuccessful={isPaymentSuccessful}
           transactionId={transactionId}
           amount={amount}
-        /> */}
+        />
         <p className="mt-4 text-blue-600">
           SubscriptionCheckout component temporarily disabled for debugging
         </p>
