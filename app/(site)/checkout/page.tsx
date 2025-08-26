@@ -241,19 +241,24 @@ interface CheckOutPageProps {
   };
 }
 
-const getCartFromCookies = async (): Promise<ShoppingCartCheckout> => {
+const getCartFromCookies = (): ShoppingCartCheckout => {
   try {
-    const cookieStore = await cookies();
+    // cookies() is synchronous in Next.js App Router
+    const cookieStore = cookies();
     const cartCookie = cookieStore.get("shopping_cart");
+
+    console.log("Raw cookie value:", cartCookie?.value);
 
     if (cartCookie?.value) {
       const parsedCart = JSON.parse(cartCookie.value);
+      console.log("Parsed cart:", parsedCart);
+      
       // Ensure the cart has the required structure
       return {
         items: parsedCart.items || [],
         total: parsedCart.total || 0,
         type: parsedCart.type || "NONE",
-        itemCount: parsedCart.itemCount || 0,
+        itemCount: parsedCart.itemCount || parsedCart.items?.length || 0,
         currency: parsedCart.currency || "BDT",
         lastUpdated: parsedCart.lastUpdated || new Date().toISOString(),
       };
@@ -281,11 +286,13 @@ const getCartFromCookies = async (): Promise<ShoppingCartCheckout> => {
 };
 
 const CheckOutPage = async ({ searchParams }: CheckOutPageProps) => {
-  // Get cart data from cookies (await the promise)
-  const cartData = await getCartFromCookies();
+  // Get cart data from cookies (no await needed)
+  const cartData = getCartFromCookies();
 
-  // Debug: Log cart data (remove in production)
-  console.log("Cart data:", cartData);
+  // Debug: Log cart data
+  console.log("Final cart data:", cartData);
+  console.log("Cart has items:", cartData.items.length > 0);
+  console.log("Cart type:", cartData.type);
 
   if (!cartData || cartData.items.length === 0) {
     return (
@@ -320,35 +327,59 @@ const CheckOutPage = async ({ searchParams }: CheckOutPageProps) => {
   const amount = searchParams.amount;
   const isPaymentSuccessful = !!(transactionId && amount);
 
+  // Temporary: Show debug info instead of components to test
   if (cartData.type === "SUBSCRIPTION") {
     return (
-      <SubscriptionCheckout
-        cartData={cartData}
-        errorMessage={errorMessage}
-        isPaymentSuccessful={isPaymentSuccessful}
-        transactionId={transactionId}
-        amount={amount}
-      />
+      <div className="app-container py-20 text-center">
+        <h2 className="text-2xl font-bold mb-4 text-green-600">✅ Subscription Cart Found!</h2>
+        <div className="max-w-2xl mx-auto bg-gray-100 p-6 rounded-lg">
+          <h3 className="font-bold mb-4">Cart Data:</h3>
+          <pre className="text-left text-sm overflow-auto whitespace-pre-wrap">
+            {JSON.stringify(cartData, null, 2)}
+          </pre>
+          <div className="mt-4 pt-4 border-t">
+            <h3 className="font-bold mb-2">Search Params:</h3>
+            <pre className="text-left text-sm">
+              {JSON.stringify(searchParams, null, 2)}
+            </pre>
+          </div>
+        </div>
+        <p className="mt-4 text-blue-600">
+          SubscriptionCheckout component temporarily disabled for debugging
+        </p>
+        <p className="text-sm text-gray-600 mt-2">
+          If you see this page, the main logic is working. The issue is likely in the SubscriptionCheckout component.
+        </p>
+      </div>
     );
   }
 
   if (cartData.type === "COURSE") {
     return (
-      <CourseCheckout
-        cartData={cartData}
-        errorMessage={errorMessage}
-        isPaymentSuccessful={isPaymentSuccessful}
-        transactionId={transactionId}
-        amount={amount}
-      />
+      <div className="app-container py-20 text-center">
+        <h2 className="text-2xl font-bold mb-4 text-green-600">✅ Course Cart Found!</h2>
+        <div className="max-w-2xl mx-auto bg-gray-100 p-6 rounded-lg">
+          <pre className="text-left text-sm overflow-auto">
+            {JSON.stringify(cartData, null, 2)}
+          </pre>
+        </div>
+        <p className="mt-4 text-blue-600">
+          CourseCheckout component temporarily disabled for debugging
+        </p>
+      </div>
     );
   }
 
   // Fallback for unknown cart type
   return (
     <div className="app-container py-20 text-center">
-      <h2 className="text-2xl font-bold mb-4">অজানা কার্ট টাইপ</h2>
+      <h2 className="text-2xl font-bold mb-4 text-red-600">❌ Unknown Cart Type</h2>
       <p className="mb-4">কার্ট টাইপ: {cartData.type}</p>
+      <div className="max-w-2xl mx-auto bg-gray-100 p-6 rounded-lg mb-4">
+        <pre className="text-left text-sm overflow-auto">
+          {JSON.stringify(cartData, null, 2)}
+        </pre>
+      </div>
       <Link href="/prime">
         <Button variant="primary">
           <ArrowLeft className="mr-2 w-4 h-4" />

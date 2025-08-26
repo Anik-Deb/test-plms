@@ -30,7 +30,9 @@ export default async function SubscriptionCheckout({
   transactionId,
   amount,
 }: any) {
+  console.log(' result:', cartData?.items);
   const plan = await getSubscriptionPlanByIdDBCall(cartData?.items[0]?.planId);
+
   if (!plan) {
     redirect("/prime"); // If no plan in cookies, send user back
   }
