@@ -222,6 +222,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import SubscriptionCheckout from "./_components/subscription-checkout";
 import CourseCheckout from "./_components/course-checkout";
+import { getSubscriptionPlanByIdDBCall } from "@/lib/data-access-layer/subscriptions";
 
 type ShoppingCartCheckout = {
   items: any[];
@@ -252,7 +253,7 @@ const getCartFromCookies = (): ShoppingCartCheckout => {
     if (cartCookie?.value) {
       const parsedCart = JSON.parse(cartCookie.value);
       console.log("Parsed cart:", parsedCart);
-      
+
       // Ensure the cart has the required structure
       return {
         items: parsedCart.items || [],
@@ -286,8 +287,11 @@ const getCartFromCookies = (): ShoppingCartCheckout => {
 };
 
 const CheckOutPage = async ({ searchParams }: CheckOutPageProps) => {
+  console.log("searchParams result:", searchParams);
   // Get cart data from cookies (no await needed)
   const cartData = getCartFromCookies();
+  const plan = await getSubscriptionPlanByIdDBCall(cartData?.items[0]?.planId);
+  console.log("plan result:", plan);
 
   // Debug: Log cart data
   console.log("Final cart data:", cartData);
@@ -331,9 +335,11 @@ const CheckOutPage = async ({ searchParams }: CheckOutPageProps) => {
   if (cartData.type === "SUBSCRIPTION") {
     return (
       <div className="app-container py-20 text-center">
-        <h2 className="text-2xl font-bold mb-4 text-green-600">✅ Subscription Cart Found!</h2>
+        <h2 className="text-2xl font-bold mb-4 text-green-600">
+          ✅ Subscription Cart Found!
+        </h2>
         <div className="max-w-2xl mx-auto bg-gray-100 p-6 rounded-lg">
-          <h3 className="font-bold mb-4">Cart Data:</h3>
+          <h3 className="font-bold mb-4">Cart Data: {plan?.name} </h3>
           <pre className="text-left text-sm overflow-auto whitespace-pre-wrap">
             {JSON.stringify(cartData, null, 2)}
           </pre>
@@ -344,11 +350,20 @@ const CheckOutPage = async ({ searchParams }: CheckOutPageProps) => {
             </pre>
           </div>
         </div>
+        {/* <SubscriptionCheckout
+          cartData={cartData}
+          plan={plan}
+          errorMessage={errorMessage}
+          isPaymentSuccessful={isPaymentSuccessful}
+          transactionId={transactionId}
+          amount={amount}
+        /> */}
         <p className="mt-4 text-blue-600">
           SubscriptionCheckout component temporarily disabled for debugging
         </p>
         <p className="text-sm text-gray-600 mt-2">
-          If you see this page, the main logic is working. The issue is likely in the SubscriptionCheckout component.
+          If you see this page, the main logic is working. The issue is likely
+          in the SubscriptionCheckout component.
         </p>
       </div>
     );
@@ -357,7 +372,9 @@ const CheckOutPage = async ({ searchParams }: CheckOutPageProps) => {
   if (cartData.type === "COURSE") {
     return (
       <div className="app-container py-20 text-center">
-        <h2 className="text-2xl font-bold mb-4 text-green-600">✅ Course Cart Found!</h2>
+        <h2 className="text-2xl font-bold mb-4 text-green-600">
+          ✅ Course Cart Found!
+        </h2>
         <div className="max-w-2xl mx-auto bg-gray-100 p-6 rounded-lg">
           <pre className="text-left text-sm overflow-auto">
             {JSON.stringify(cartData, null, 2)}
@@ -373,7 +390,9 @@ const CheckOutPage = async ({ searchParams }: CheckOutPageProps) => {
   // Fallback for unknown cart type
   return (
     <div className="app-container py-20 text-center">
-      <h2 className="text-2xl font-bold mb-4 text-red-600">❌ Unknown Cart Type</h2>
+      <h2 className="text-2xl font-bold mb-4 text-red-600">
+        ❌ Unknown Cart Type
+      </h2>
       <p className="mb-4">কার্ট টাইপ: {cartData.type}</p>
       <div className="max-w-2xl mx-auto bg-gray-100 p-6 rounded-lg mb-4">
         <pre className="text-left text-sm overflow-auto">
