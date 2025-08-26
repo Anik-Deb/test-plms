@@ -215,6 +215,7 @@
 // };
 
 // export default CheckOutPage;
+export const dynamic = "force-dynamic";
 
 import { cookies } from "next/headers";
 import Link from "next/link";
@@ -223,6 +224,7 @@ import { ArrowLeft } from "lucide-react";
 import SubscriptionCheckout from "./_components/subscription-checkout";
 import CourseCheckout from "./_components/course-checkout";
 import { getSubscriptionPlanByIdDBCall } from "@/lib/data-access-layer/subscriptions";
+import { getServerCart } from "@/lib/actions/cart-cookie";
 
 type ShoppingCartCheckout = {
   items: any[];
@@ -242,54 +244,10 @@ interface CheckOutPageProps {
   };
 }
 
-const getCartFromCookies = (): ShoppingCartCheckout => {
-  try {
-    // cookies() is synchronous in Next.js App Router
-    const cookieStore = cookies();
-    const cartCookie = cookieStore.get("shopping_cart");
-
-    console.log("Raw cookie value:", cartCookie?.value);
-
-    if (cartCookie?.value) {
-      const parsedCart = JSON.parse(cartCookie.value);
-      console.log("Parsed cart:", parsedCart);
-
-      // Ensure the cart has the required structure
-      return {
-        items: parsedCart.items || [],
-        total: parsedCart.total || 0,
-        type: parsedCart.type || "NONE",
-        itemCount: parsedCart.itemCount || parsedCart.items?.length || 0,
-        currency: parsedCart.currency || "BDT",
-        lastUpdated: parsedCart.lastUpdated || new Date().toISOString(),
-      };
-    }
-
-    return {
-      items: [],
-      total: 0,
-      type: "NONE",
-      itemCount: 0,
-      currency: "BDT",
-      lastUpdated: new Date().toISOString(),
-    };
-  } catch (error) {
-    console.error("Error parsing cart from cookies:", error);
-    return {
-      items: [],
-      total: 0,
-      type: "NONE",
-      itemCount: 0,
-      currency: "BDT",
-      lastUpdated: new Date().toISOString(),
-    };
-  }
-};
-
 const CheckOutPage = async ({ searchParams }: CheckOutPageProps) => {
   console.log("searchParams result:", searchParams);
   // Get cart data from cookies (no await needed)
-  const cartData = getCartFromCookies();
+  const cartData = await getServerCart();
   const plan = await getSubscriptionPlanByIdDBCall(cartData?.items[0]?.planId);
   console.log("plan result:", plan);
 
@@ -369,23 +327,23 @@ const CheckOutPage = async ({ searchParams }: CheckOutPageProps) => {
     );
   }
 
-  if (cartData.type === "COURSE") {
-    return (
-      <div className="app-container py-20 text-center">
-        <h2 className="text-2xl font-bold mb-4 text-green-600">
-          ✅ Course Cart Found!
-        </h2>
-        <div className="max-w-2xl mx-auto bg-gray-100 p-6 rounded-lg">
-          <pre className="text-left text-sm overflow-auto">
-            {JSON.stringify(cartData, null, 2)}
-          </pre>
-        </div>
-        <p className="mt-4 text-blue-600">
-          CourseCheckout component temporarily disabled for debugging
-        </p>
-      </div>
-    );
-  }
+  // if (cartData.type === "COURSE") {
+  //   return (
+  //     <div className="app-container py-20 text-center">
+  //       <h2 className="text-2xl font-bold mb-4 text-green-600">
+  //         ✅ Course Cart Found!
+  //       </h2>
+  //       <div className="max-w-2xl mx-auto bg-gray-100 p-6 rounded-lg">
+  //         <pre className="text-left text-sm overflow-auto">
+  //           {JSON.stringify(cartData, null, 2)}
+  //         </pre>
+  //       </div>
+  //       <p className="mt-4 text-blue-600">
+  //         CourseCheckout component temporarily disabled for debugging
+  //       </p>
+  //     </div>
+  //   );
+  // }
 
   // Fallback for unknown cart type
   return (
