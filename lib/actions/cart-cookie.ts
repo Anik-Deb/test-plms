@@ -50,9 +50,7 @@ export async function setServerCart(cartData: ShoppingCartCheckout) {
       value: JSON.stringify(cartData),
       maxAge: 7 * 24 * 60 * 60, // 7 days
       path: "/",
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      httpOnly: false, // Must be false for client access
+      secure: false, // Must be false for client access
     });
     return true;
   } catch (error) {
