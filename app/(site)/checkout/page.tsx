@@ -85,26 +85,26 @@ const CheckOutPage = async ({ searchParams }: CheckOutPageProps) => {
       );
     }
 
-    // if (cartData?.type === "COURSE") {
-    //   console.log("CheckOutPage: Rendering CourseCheckout");
-    //   console.log("CheckOutPage: Course item data:", {
-    //     courseSlug: cartData.items[0]?.courseSlug,
-    //     checkoutType: cartData.items[0]?.checkoutType,
-    //     itemKeys: Object.keys(cartData.items[0] || {}),
-    //   });
+    if (cartData?.type === "COURSE") {
+      console.log("CheckOutPage: Rendering CourseCheckout");
+      console.log("CheckOutPage: Course item data:", {
+        courseSlug: cartData.items[0]?.courseSlug,
+        checkoutType: cartData.items[0]?.checkoutType,
+        itemKeys: Object.keys(cartData.items[0] || {}),
+      });
 
-    //   return (
-    //     <div>
-    //       <CourseCheckout
-    //         cartData={cartData}
-    //         errorMessage={errorMessage}
-    //         isPaymentSuccessful={isPaymentSuccessful}
-    //         transactionId={transactionId}
-    //         amount={amount}
-    //       />
-    //     </div>
-    //   );
-    // }
+      return (
+        <div>
+          <CourseCheckout
+            cartData={cartData}
+            errorMessage={errorMessage}
+            isPaymentSuccessful={isPaymentSuccessful}
+            transactionId={transactionId}
+            amount={amount}
+          />
+        </div>
+      );
+    }
 
     console.log(
       "CheckOutPage: No matching cart type, cart type is:",
