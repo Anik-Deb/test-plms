@@ -67,6 +67,20 @@ const CheckOutPage = async ({ searchParams }: CheckOutPageProps) => {
       </div>
     );
   }
+
+  if (cartData?.type === "COURSE") {
+    return (
+      <div>
+        <CourseCheckout
+          cartData={cartData}
+          errorMessage={errorMessage}
+          isPaymentSuccessful={isPaymentSuccessful}
+          transactionId={transactionId}
+          amount={amount}
+        />
+      </div>
+    );
+  }
 };
 
 export default CheckOutPage;
